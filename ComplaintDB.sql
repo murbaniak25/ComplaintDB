@@ -374,13 +374,15 @@ CREATE PROCEDURE [dbo].[usp_InsertComplaint]
     @StatusID INT,
     @CustomerID INT,
     @EmployeeID INT,
-    @ProductID INT
+    @ProductID INT,
+	@ResolutionTypeID INT,
+	@ComplaintTypeID INT
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        INSERT INTO Complaints (StatusID, CustomerID, EmployeeID, ProductID)
-        VALUES (@StatusID, @CustomerID, @EmployeeID, @ProductID);
+        INSERT INTO Complaints (StatusID, CustomerID, EmployeeID, ProductID, ResolutionTypeID, ComplaintTypeID)
+        VALUES (@StatusID, @CustomerID, @EmployeeID, @ProductID, @ResolutionTypeID, @ComplaintTypeID);
     END TRY
     BEGIN CATCH
         DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
@@ -424,13 +426,14 @@ CREATE PROCEDURE [dbo].[usp_InsertEmployee]
     @Email VARCHAR(100),
     @PhoneNumber VARCHAR(15),
     @HireDate DATE,
+	@AddressID INT,
     @Salary MONEY
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        INSERT INTO Employees (LastName, FirstName, Email, PhoneNumber, HireDate, Salary)
-        VALUES (@LastName, @FirstName, @Email, @PhoneNumber, @HireDate, @Salary);
+        INSERT INTO Employees (LastName, FirstName, Email, PhoneNumber, HireDate, AddressID, Salary)
+        VALUES (@LastName, @FirstName, @Email, @PhoneNumber, @HireDate, @AddressID, @Salary);
     END TRY
     BEGIN CATCH
         DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
@@ -445,6 +448,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 
 CREATE PROCEDURE [dbo].[usp_InsertProduct]
+	@SupplierID INT,
     @ProductName VARCHAR(50),
     @Unit VARCHAR(20),
     @Price MONEY
@@ -452,8 +456,8 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        INSERT INTO Products (ProductName, Unit, Price)
-        VALUES (@ProductName, @Unit, @Price);
+        INSERT INTO Products (SupplierID, ProductName, Unit, Price)
+        VALUES (@SupplierID, @ProductName, @Unit, @Price);
     END TRY
     BEGIN CATCH
         DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
