@@ -1,22 +1,22 @@
 USE [ComplaintsDB]
 GO
-/****** Object:  User [ADMIN]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  User [ADMIN]    Script Date: 09.12.2024 15:55:13 ******/
 CREATE USER [ADMIN] FOR LOGIN [admin] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  User [WORKER]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  User [WORKER]    Script Date: 09.12.2024 15:55:13 ******/
 CREATE USER [WORKER] FOR LOGIN [WORKER] WITH DEFAULT_SCHEMA=[dbo]
 GO
-/****** Object:  DatabaseRole [EMPLOYEE]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  DatabaseRole [EMPLOYEE]    Script Date: 09.12.2024 15:55:13 ******/
 CREATE ROLE [EMPLOYEE]
 GO
-/****** Object:  DatabaseRole [ROOT]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  DatabaseRole [ROOT]    Script Date: 09.12.2024 15:55:13 ******/
 CREATE ROLE [ROOT]
 GO
 ALTER ROLE [ROOT] ADD MEMBER [ADMIN]
 GO
 ALTER ROLE [EMPLOYEE] ADD MEMBER [WORKER]
 GO
-/****** Object:  Table [dbo].[Employees]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[Employees]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -25,8 +25,8 @@ CREATE TABLE [dbo].[Employees](
 	[EmployeeID] [int] NOT NULL,
 	[LastName] [nvarchar](50) NOT NULL,
 	[FirstName] [nvarchar](50) NOT NULL,
-	[Email] [nvarchar](100) NOT NULL,
-	[PhoneNumber] [nvarchar](50) NOT NULL,
+	[Email] [nvarchar](100) NULL,
+	[PhoneNumber] [nvarchar](50) NULL,
 	[HireDate] [date] NOT NULL,
 	[AddressID] [int] NOT NULL,
 	[Salary] [money] NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE [dbo].[Employees](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Complaints]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[Complaints]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -55,7 +55,7 @@ CREATE TABLE [dbo].[Complaints](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vw_ReklamacjePracownicy]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  View [dbo].[vw_ReklamacjePracownicy]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -73,7 +73,7 @@ GROUP BY
     e.FirstName,
     e.LastName;
 GO
-/****** Object:  Table [dbo].[Status]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[Status]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -87,7 +87,7 @@ CREATE TABLE [dbo].[Status](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vw_ComplaintsByStatus]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  View [dbo].[vw_ComplaintsByStatus]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -103,36 +103,7 @@ LEFT JOIN
 GROUP BY 
     s.StatusName;
 GO
-/****** Object:  Table [dbo].[ComplaintDetails]    Script Date: 08.12.2024 23:55:45 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ComplaintDetails](
-	[ComplaintID] [int] NOT NULL,
-	[Description] [nvarchar](500) NULL,
-	[ComplaintDate] [date] NOT NULL,
-	[ResolutionDate] [date] NULL
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Products]    Script Date: 08.12.2024 23:55:45 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Products](
-	[ProductID] [int] NOT NULL,
-	[SupplierID] [int] NOT NULL,
-	[ProductName] [nvarchar](50) NOT NULL,
-	[Unit] [nvarchar](50) NOT NULL,
-	[Price] [money] NOT NULL,
- CONSTRAINT [PK_Products] PRIMARY KEY CLUSTERED 
-(
-	[ProductID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Customers]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[Customers]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -148,7 +119,36 @@ CREATE TABLE [dbo].[Customers](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  View [dbo].[vw_ComplaintResolutionTime]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[Products]    Script Date: 09.12.2024 15:55:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Products](
+	[ProductID] [int] NOT NULL,
+	[SupplierID] [int] NULL,
+	[ProductName] [nvarchar](50) NULL,
+	[Unit] [nvarchar](50) NULL,
+	[Price] [money] NULL,
+ CONSTRAINT [PK_Products] PRIMARY KEY CLUSTERED 
+(
+	[ProductID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ComplaintDetails]    Script Date: 09.12.2024 15:55:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ComplaintDetails](
+	[ComplaintID] [int] NOT NULL,
+	[Description] [nvarchar](500) NULL,
+	[ComplaintDate] [date] NOT NULL,
+	[ResolutionDate] [date] NULL
+) ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vw_ComplaintResolutionTime]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -168,7 +168,7 @@ JOIN
 JOIN 
     Products p ON c.ProductID = p.ProductID;
 GO
-/****** Object:  Table [dbo].[Addresses]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[Addresses]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -184,19 +184,22 @@ CREATE TABLE [dbo].[Addresses](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[PaymentMethods]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[PaymentMethods]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[PaymentMethods](
 	[PaymentMethodID] [int] NOT NULL,
-	[PaymentMethodName] [nvarchar](50) NOT NULL,
-	[PaymentMethodDescription] [nvarchar](255) NOT NULL,
-	[ResolutionTypeID] [int] NOT NULL
+	[PaymentMethodName] [nvarchar](50) NULL,
+	[PaymentMethodDescription] [nvarchar](255) NULL,
+ CONSTRAINT [PK_PaymentMethods] PRIMARY KEY CLUSTERED 
+(
+	[PaymentMethodID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[PostalCodes]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[PostalCodes]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -211,7 +214,18 @@ CREATE TABLE [dbo].[PostalCodes](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[ResolutionTypes]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[ResolutionTypeOptions]    Script Date: 09.12.2024 15:55:13 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ResolutionTypeOptions](
+	[ResolutionTypeID] [int] NOT NULL,
+	[PaymentMethodID] [int] NOT NULL,
+	[ShippingMethodID] [int] NOT NULL
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ResolutionTypes]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -225,28 +239,31 @@ CREATE TABLE [dbo].[ResolutionTypes](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[ShippingMethods]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[ShippingOptions]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE TABLE [dbo].[ShippingMethods](
+CREATE TABLE [dbo].[ShippingOptions](
 	[ShippingMethodID] [int] NOT NULL,
-	[ShippingMethodName] [nvarchar](50) NOT NULL,
-	[ShippingCost] [money] NOT NULL,
-	[ResolutionTypeID] [int] NOT NULL
+	[ShippingMethodName] [nvarchar](50) NULL,
+	[ShippingMethodDescription] [nvarchar](255) NULL,
+ CONSTRAINT [PK_ShippingOptions] PRIMARY KEY CLUSTERED 
+(
+	[ShippingMethodID] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
-/****** Object:  Table [dbo].[Suppliers]    Script Date: 08.12.2024 23:55:45 ******/
+/****** Object:  Table [dbo].[Suppliers]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[Suppliers](
 	[SupplierID] [int] NOT NULL,
-	[SupplierName] [nvarchar](50) NOT NULL,
+	[SupplierName] [nvarchar](50) NULL,
 	[AddressID] [int] NOT NULL,
-	[PhoneNumber] [nvarchar](10) NOT NULL,
+	[PhoneNumber] [nvarchar](10) NULL,
  CONSTRAINT [PK_Suppliers] PRIMARY KEY CLUSTERED 
 (
 	[SupplierID] ASC
@@ -298,27 +315,32 @@ REFERENCES [dbo].[Addresses] ([AddressID])
 GO
 ALTER TABLE [dbo].[Employees] CHECK CONSTRAINT [FK_Employees_Addresses]
 GO
-ALTER TABLE [dbo].[PaymentMethods]  WITH CHECK ADD  CONSTRAINT [FK_PaymentMethods_ResolutionTypes] FOREIGN KEY([ResolutionTypeID])
-REFERENCES [dbo].[ResolutionTypes] ([ResolutionTypeID])
-GO
-ALTER TABLE [dbo].[PaymentMethods] CHECK CONSTRAINT [FK_PaymentMethods_ResolutionTypes]
-GO
 ALTER TABLE [dbo].[Products]  WITH CHECK ADD  CONSTRAINT [FK_Products_Suppliers] FOREIGN KEY([SupplierID])
 REFERENCES [dbo].[Suppliers] ([SupplierID])
 GO
 ALTER TABLE [dbo].[Products] CHECK CONSTRAINT [FK_Products_Suppliers]
 GO
-ALTER TABLE [dbo].[ShippingMethods]  WITH CHECK ADD  CONSTRAINT [FK_ShippingMethods_ResolutionTypes] FOREIGN KEY([ResolutionTypeID])
+ALTER TABLE [dbo].[ResolutionTypeOptions]  WITH CHECK ADD  CONSTRAINT [FK_ResolutionTypeOptions_PaymentMethods] FOREIGN KEY([PaymentMethodID])
+REFERENCES [dbo].[PaymentMethods] ([PaymentMethodID])
+GO
+ALTER TABLE [dbo].[ResolutionTypeOptions] CHECK CONSTRAINT [FK_ResolutionTypeOptions_PaymentMethods]
+GO
+ALTER TABLE [dbo].[ResolutionTypeOptions]  WITH CHECK ADD  CONSTRAINT [FK_ResolutionTypeOptions_ResolutionTypes] FOREIGN KEY([ResolutionTypeID])
 REFERENCES [dbo].[ResolutionTypes] ([ResolutionTypeID])
 GO
-ALTER TABLE [dbo].[ShippingMethods] CHECK CONSTRAINT [FK_ShippingMethods_ResolutionTypes]
+ALTER TABLE [dbo].[ResolutionTypeOptions] CHECK CONSTRAINT [FK_ResolutionTypeOptions_ResolutionTypes]
+GO
+ALTER TABLE [dbo].[ResolutionTypeOptions]  WITH CHECK ADD  CONSTRAINT [FK_ResolutionTypeOptions_ShippingOptions] FOREIGN KEY([ShippingMethodID])
+REFERENCES [dbo].[ShippingOptions] ([ShippingMethodID])
+GO
+ALTER TABLE [dbo].[ResolutionTypeOptions] CHECK CONSTRAINT [FK_ResolutionTypeOptions_ShippingOptions]
 GO
 ALTER TABLE [dbo].[Suppliers]  WITH CHECK ADD  CONSTRAINT [FK_Suppliers_Addresses] FOREIGN KEY([AddressID])
 REFERENCES [dbo].[Addresses] ([AddressID])
 GO
 ALTER TABLE [dbo].[Suppliers] CHECK CONSTRAINT [FK_Suppliers_Addresses]
 GO
-/****** Object:  StoredProcedure [dbo].[usp_DeleteComplaint]    Script Date: 08.12.2024 23:55:46 ******/
+/****** Object:  StoredProcedure [dbo].[usp_DeleteComplaint]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -342,7 +364,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertComplaint]    Script Date: 08.12.2024 23:55:46 ******/
+/****** Object:  StoredProcedure [dbo].[usp_InsertComplaint]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -366,7 +388,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertComplaintDetail]    Script Date: 08.12.2024 23:55:46 ******/
+/****** Object:  StoredProcedure [dbo].[usp_InsertComplaintDetail]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -390,37 +412,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertCustomer]    Script Date: 08.12.2024 23:55:46 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
--- ========================================
--- 5. Procedury
--- ========================================
-
-CREATE PROCEDURE [dbo].[usp_InsertCustomer]
-    @CustomerName VARCHAR(50),
-    @Contact VARCHAR(20),
-    @Address VARCHAR(100),
-    @City VARCHAR(100),
-    @PostalCode VARCHAR(10),
-    @Country VARCHAR(50)
-AS
-BEGIN
-    SET NOCOUNT ON;
-    BEGIN TRY
-        INSERT INTO Customers (CustomerName, Contact, Address, City, PostalCode, Country)
-        VALUES (@CustomerName, @Contact, @Address, @City, @PostalCode, @Country);
-    END TRY
-    BEGIN CATCH
-        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
-        RAISERROR (@ErrorMessage, 16, 1);
-    END CATCH
-END;
-GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertEmployee]    Script Date: 08.12.2024 23:55:46 ******/
+/****** Object:  StoredProcedure [dbo].[usp_InsertEmployee]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -446,7 +438,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertProduct]    Script Date: 08.12.2024 23:55:46 ******/
+/****** Object:  StoredProcedure [dbo].[usp_InsertProduct]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -469,7 +461,7 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertStatus]    Script Date: 08.12.2024 23:55:46 ******/
+/****** Object:  StoredProcedure [dbo].[usp_InsertStatus]    Script Date: 09.12.2024 15:55:13 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
