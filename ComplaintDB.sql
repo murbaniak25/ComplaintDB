@@ -810,3 +810,53 @@ EXEC usp_InsertComplaintDetail @ComplaintID=12, @Description='Reklamacja w toku'
 EXEC usp_InsertComplaintDetail @ComplaintID=13, @Description='Reklamacja w toku', @ComplaintDate='2024-06-13';
 EXEC usp_InsertComplaintDetail @ComplaintID=14, @Description='Reklamacja w toku', @ComplaintDate='2024-06-14';
 EXEC usp_InsertComplaintDetail @ComplaintID=15, @Description='Reklamacja w toku', @ComplaintDate='2024-06-15';
+-- ========================================
+-- 7. Loginy, U¿ytkownicy, Role, Uprawnienia
+-- ========================================
+CREATE USER [ADMIN] FOR LOGIN [admin] WITH DEFAULT_SCHEMA=[dbo];
+CREATE USER [WORKER] FOR LOGIN [WORKER] WITH DEFAULT_SCHEMA=[dbo];
+
+CREATE ROLE [ROOT];
+CREATE ROLE [EMPLOYEE];
+
+ALTER ROLE [ROOT] ADD MEMBER [ADMIN];
+ALTER ROLE [EMPLOYEE] ADD MEMBER [WORKER];
+
+-- Uprawnienia
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Customers] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Employees] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Products] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Status] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Complaints] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[ComplaintDetails] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[PaymentMethods] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Addresses] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[PostalCodes] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[ResolutionTypes] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[ShippingOptions] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[ResolutionTypeOptions] TO [ROOT];
+GRANT SELECT, INSERT, UPDATE, DELETE ON [dbo].[Suppliers] TO [ROOT];
+
+-- Procedury
+GRANT EXECUTE ON [dbo].[usp_InsertCustomer] TO [ROOT];
+GRANT EXECUTE ON [dbo].[usp_InsertEmployee] TO [ROOT];
+GRANT EXECUTE ON [dbo].[usp_InsertProduct] TO [ROOT];
+GRANT EXECUTE ON [dbo].[usp_InsertStatus] TO [ROOT];
+GRANT EXECUTE ON [dbo].[usp_InsertComplaint] TO [ROOT];
+GRANT EXECUTE ON [dbo].[usp_InsertComplaintDetail] TO [ROOT];
+GRANT EXECUTE ON [dbo].[usp_DeleteComplaint] TO [ROOT];
+GRANT EXECUTE ON [dbo].[usp_InsertPaymentMethod] TO [ROOT];
+
+GRANT SELECT ON [dbo].[Customers] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[Employees] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[Products] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[Status] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[Complaints] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[ComplaintDetails] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[PaymentMethods] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[Addresses] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[PostalCodes] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[ResolutionTypes] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[ShippingOptions] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[ResolutionTypeOptions] TO [EMPLOYEE];
+GRANT SELECT ON [dbo].[Suppliers] TO [EMPLOYEE];
