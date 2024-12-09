@@ -811,7 +811,7 @@ EXEC usp_InsertComplaintDetail @ComplaintID=13, @Description='Reklamacja w toku'
 EXEC usp_InsertComplaintDetail @ComplaintID=14, @Description='Reklamacja w toku', @ComplaintDate='2024-06-14';
 EXEC usp_InsertComplaintDetail @ComplaintID=15, @Description='Reklamacja w toku', @ComplaintDate='2024-06-15';
 -- ========================================
--- 7. Loginy, U¿ytkownicy, Role, Uprawnienia
+-- 7. Loginy, Uzytkownicy, Role, Uprawnienia
 -- ========================================
 CREATE USER [ADMIN] FOR LOGIN [admin] WITH DEFAULT_SCHEMA=[dbo];
 CREATE USER [WORKER] FOR LOGIN [WORKER] WITH DEFAULT_SCHEMA=[dbo];
@@ -860,3 +860,33 @@ GRANT SELECT ON [dbo].[ResolutionTypes] TO [EMPLOYEE];
 GRANT SELECT ON [dbo].[ShippingOptions] TO [EMPLOYEE];
 GRANT SELECT ON [dbo].[ResolutionTypeOptions] TO [EMPLOYEE];
 GRANT SELECT ON [dbo].[Suppliers] TO [EMPLOYEE];
+
+-- ========================================
+-- 8. Backup Bazy Danych
+-- ========================================
+
+BACKUP DATABASE [ComplaintDB]
+TO  DISK = N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Backup\ComplaintDB.bak' 
+WITH NOFORMAT,
+NOINIT,
+NAME = N'ComplaintDB-Full Database Backup',
+SKIP,
+NOREWIND,
+NOUNLOAD,
+STATS = 10
+GO
+
+-- ========================================
+-- 9. Przywracanie Bazy Danych z loginem sa
+-- ========================================
+
+--RESTORE DATABASE [ComplaintDB]
+--FROM DISK = N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\Backup\ComplaintDB.bak'
+--WITH FILE = 1, -- Domyœlnie pierwszy zestaw backupu w pliku
+--MOVE N'ComplaintDB_Data' TO N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\ComplaintDB.mdf', -- Lokalizacja pliku danych
+--MOVE N'ComplaintDB_Log' TO N'C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\ComplaintDB.ldf', -- Lokalizacja pliku logu
+--NOUNLOAD,
+--STATS = 10; -- Wyœwietlanie postêpu co 10%
+--GO
+
+
