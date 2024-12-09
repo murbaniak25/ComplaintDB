@@ -83,7 +83,25 @@ Szczegóły reklamacji, takie jak opis, data zgłoszenia i rozwiązania.
    Ustawia datę rozwiązania reklamacji, gdy jej status zmienia się na "Zakończona".
 
 ---
-
 ## Analiza Wizualna
-Poniżej przedstawiono wizualizacje danych przygotowane w Power BI na podstawie bazy **ComplaintsDB**.
+
+Poniżej znajduje się zrzut ekranu przedstawiający różne wizualizacje danych przygotowane w Power BI na podstawie bazy **ComplaintsDB**.
+
+![Wykresy wizualizacji danych](ścieżka/do/wykresy.png)
+
+### Opis Wykresów
+1. **Liczba reklamacji według pracownika**  
+   Wykres kołowy pokazuje procentowy udział reklamacji obsłużonych przez każdego pracownika.
+
+2. **Średni czas rozwiązania reklamacji według pracownika**  
+   Wykres słupkowy przedstawia średni czas (w dniach) rozwiązania reklamacji przez poszczególnych pracowników.
+
+3. **Liczba reklamacji według klientów**  
+   Wykres kołowy obrazuje udział procentowy reklamacji zgłaszanych przez różnych klientów.
+
+4. **Średni czas rozwiązania reklamacji według produktów**  
+   Wykres słupkowy przedstawia średni czas rozwiązania reklamacji dla poszczególnych produktów.
+   
+5. **Liczba reklamacji o danym statusie**
+   Tabela przedstawia ile jest reklamacji o danym statusie
 
