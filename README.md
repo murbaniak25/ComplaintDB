@@ -102,6 +102,6 @@ Poniżej znajduje się zrzut ekranu przedstawiający różne wizualizacje danych
 4. **Średni czas rozwiązania reklamacji według produktów**  
    Wykres słupkowy przedstawia średni czas rozwiązania reklamacji dla poszczególnych produktów.
    
-5. **Liczba reklamacji o danym statusie**
+5. **Liczba reklamacji o danym statusie**  
    Tabela przedstawia ile jest reklamacji o danym statusie.
 
