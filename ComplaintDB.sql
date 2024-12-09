@@ -1,382 +1,458 @@
-USE [ComplaintsDB]
-GO
-/****** Object:  User [ADMIN]    Script Date: 09.12.2024 15:55:13 ******/
-CREATE USER [ADMIN] FOR LOGIN [admin] WITH DEFAULT_SCHEMA=[dbo]
-GO
-/****** Object:  User [WORKER]    Script Date: 09.12.2024 15:55:13 ******/
-CREATE USER [WORKER] FOR LOGIN [WORKER] WITH DEFAULT_SCHEMA=[dbo]
-GO
-/****** Object:  DatabaseRole [EMPLOYEE]    Script Date: 09.12.2024 15:55:13 ******/
-CREATE ROLE [EMPLOYEE]
-GO
-/****** Object:  DatabaseRole [ROOT]    Script Date: 09.12.2024 15:55:13 ******/
-CREATE ROLE [ROOT]
-GO
-ALTER ROLE [ROOT] ADD MEMBER [ADMIN]
-GO
-ALTER ROLE [EMPLOYEE] ADD MEMBER [WORKER]
-GO
-/****** Object:  Table [dbo].[Employees]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Employees](
-	[EmployeeID] [int] NOT NULL,
-	[LastName] [nvarchar](50) NOT NULL,
-	[FirstName] [nvarchar](50) NOT NULL,
-	[Email] [nvarchar](100) NULL,
-	[PhoneNumber] [nvarchar](50) NULL,
-	[HireDate] [date] NOT NULL,
-	[AddressID] [int] NOT NULL,
-	[Salary] [money] NOT NULL,
- CONSTRAINT [PK_Employees] PRIMARY KEY CLUSTERED 
-(
-	[EmployeeID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Complaints]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Complaints](
-	[ComplaintID] [int] NOT NULL,
-	[StatusID] [int] NOT NULL,
-	[CustomerID] [int] NOT NULL,
-	[EmployeeID] [int] NOT NULL,
-	[ProductID] [int] NOT NULL,
-	[ResolutionTypeID] [int] NOT NULL,
-	[ComplaintTypeID] [int] NOT NULL,
- CONSTRAINT [PK_Complaints] PRIMARY KEY CLUSTERED 
-(
-	[ComplaintID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  View [dbo].[vw_ReklamacjePracownicy]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[vw_ReklamacjePracownicy] AS
-SELECT
-    e.EmployeeID,
-    e.FirstName + ' ' + e.LastName AS EmployeeName,
-    COUNT(c.ComplaintID) AS LiczbaReklamacji
-FROM
-    Complaints c
-    INNER JOIN Employees e ON c.EmployeeID = e.EmployeeID
-GROUP BY
-    e.EmployeeID,
-    e.FirstName,
-    e.LastName;
-GO
-/****** Object:  Table [dbo].[Status]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Status](
-	[StatusID] [int] NOT NULL,
-	[StatusName] [nvarchar](50) NOT NULL,
- CONSTRAINT [PK_Status] PRIMARY KEY CLUSTERED 
-(
-	[StatusID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  View [dbo].[vw_ComplaintsByStatus]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[vw_ComplaintsByStatus] AS
-SELECT 
-    s.StatusName, 
-    COUNT(c.ComplaintID) AS ComplaintCount
-FROM 
-    Status s
-LEFT JOIN 
-    Complaints c ON s.StatusID = c.StatusID
-GROUP BY 
-    s.StatusName;
-GO
-/****** Object:  Table [dbo].[Customers]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Customers](
-	[CustomerID] [int] NOT NULL,
-	[CustomerName] [nvarchar](50) NOT NULL,
-	[Contact] [nvarchar](50) NOT NULL,
-	[AddressID] [int] NOT NULL,
- CONSTRAINT [PK_Customers] PRIMARY KEY CLUSTERED 
-(
-	[CustomerID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Products]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Products](
-	[ProductID] [int] NOT NULL,
-	[SupplierID] [int] NULL,
-	[ProductName] [nvarchar](50) NULL,
-	[Unit] [nvarchar](50) NULL,
-	[Price] [money] NULL,
- CONSTRAINT [PK_Products] PRIMARY KEY CLUSTERED 
-(
-	[ProductID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[ComplaintDetails]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ComplaintDetails](
-	[ComplaintID] [int] NOT NULL,
-	[Description] [nvarchar](500) NULL,
-	[ComplaintDate] [date] NOT NULL,
-	[ResolutionDate] [date] NULL
-) ON [PRIMARY]
-GO
-/****** Object:  View [dbo].[vw_ComplaintResolutionTime]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE VIEW [dbo].[vw_ComplaintResolutionTime] AS
-SELECT 
-    cd.ComplaintID,
-    cu.CustomerName,
-    p.ProductName,
-    DATEDIFF(DAY, cd.ComplaintDate, cd.ResolutionDate) AS ResolutionTimeDays
-FROM 
-    ComplaintDetails cd
-JOIN 
-    Complaints c ON cd.ComplaintID = c.ComplaintID
-JOIN 
-    Customers cu ON c.CustomerID = cu.CustomerID
-JOIN 
-    Products p ON c.ProductID = p.ProductID;
-GO
-/****** Object:  Table [dbo].[Addresses]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Addresses](
-	[AddressID] [int] NOT NULL,
-	[Street] [nvarchar](50) NOT NULL,
-	[HouseNumber] [nvarchar](10) NOT NULL,
-	[PostalCodeID] [int] NOT NULL,
- CONSTRAINT [PK_Addresses] PRIMARY KEY CLUSTERED 
-(
-	[AddressID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[PaymentMethods]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[PaymentMethods](
-	[PaymentMethodID] [int] NOT NULL,
-	[PaymentMethodName] [nvarchar](50) NULL,
-	[PaymentMethodDescription] [nvarchar](255) NULL,
- CONSTRAINT [PK_PaymentMethods] PRIMARY KEY CLUSTERED 
-(
-	[PaymentMethodID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[PostalCodes]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[PostalCodes](
-	[PostalCodeID] [int] NOT NULL,
-	[PostalCode] [nvarchar](10) NOT NULL,
-	[City] [nvarchar](50) NOT NULL,
- CONSTRAINT [PK_PostalCodes] PRIMARY KEY CLUSTERED 
-(
-	[PostalCodeID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[ResolutionTypeOptions]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ResolutionTypeOptions](
-	[ResolutionTypeID] [int] NOT NULL,
-	[PaymentMethodID] [int] NOT NULL,
-	[ShippingMethodID] [int] NOT NULL
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[ResolutionTypes]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ResolutionTypes](
-	[ResolutionTypeID] [int] NOT NULL,
-	[ResolutionType] [nvarchar](100) NOT NULL,
- CONSTRAINT [PK_ResolutionTypes] PRIMARY KEY CLUSTERED 
-(
-	[ResolutionTypeID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[ShippingOptions]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[ShippingOptions](
-	[ShippingMethodID] [int] NOT NULL,
-	[ShippingMethodName] [nvarchar](50) NULL,
-	[ShippingMethodDescription] [nvarchar](255) NULL,
- CONSTRAINT [PK_ShippingOptions] PRIMARY KEY CLUSTERED 
-(
-	[ShippingMethodID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-/****** Object:  Table [dbo].[Suppliers]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].[Suppliers](
-	[SupplierID] [int] NOT NULL,
-	[SupplierName] [nvarchar](50) NULL,
-	[AddressID] [int] NOT NULL,
-	[PhoneNumber] [nvarchar](10) NULL,
- CONSTRAINT [PK_Suppliers] PRIMARY KEY CLUSTERED 
-(
-	[SupplierID] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[Addresses]  WITH CHECK ADD  CONSTRAINT [FK_Addresses_PostalCodes] FOREIGN KEY([PostalCodeID])
-REFERENCES [dbo].[PostalCodes] ([PostalCodeID])
-GO
-ALTER TABLE [dbo].[Addresses] CHECK CONSTRAINT [FK_Addresses_PostalCodes]
-GO
-ALTER TABLE [dbo].[ComplaintDetails]  WITH CHECK ADD  CONSTRAINT [FK_ComplaintDetails_Complaints1] FOREIGN KEY([ComplaintID])
-REFERENCES [dbo].[Complaints] ([ComplaintID])
-GO
-ALTER TABLE [dbo].[ComplaintDetails] CHECK CONSTRAINT [FK_ComplaintDetails_Complaints1]
-GO
-ALTER TABLE [dbo].[Complaints]  WITH CHECK ADD  CONSTRAINT [FK_Complaints_Customers] FOREIGN KEY([CustomerID])
-REFERENCES [dbo].[Customers] ([CustomerID])
-GO
-ALTER TABLE [dbo].[Complaints] CHECK CONSTRAINT [FK_Complaints_Customers]
-GO
-ALTER TABLE [dbo].[Complaints]  WITH CHECK ADD  CONSTRAINT [FK_Complaints_Employees] FOREIGN KEY([EmployeeID])
-REFERENCES [dbo].[Employees] ([EmployeeID])
-GO
-ALTER TABLE [dbo].[Complaints] CHECK CONSTRAINT [FK_Complaints_Employees]
-GO
-ALTER TABLE [dbo].[Complaints]  WITH CHECK ADD  CONSTRAINT [FK_Complaints_Products] FOREIGN KEY([ProductID])
-REFERENCES [dbo].[Products] ([ProductID])
-GO
-ALTER TABLE [dbo].[Complaints] CHECK CONSTRAINT [FK_Complaints_Products]
-GO
-ALTER TABLE [dbo].[Complaints]  WITH CHECK ADD  CONSTRAINT [FK_Complaints_ResolutionTypes] FOREIGN KEY([ResolutionTypeID])
-REFERENCES [dbo].[ResolutionTypes] ([ResolutionTypeID])
-GO
-ALTER TABLE [dbo].[Complaints] CHECK CONSTRAINT [FK_Complaints_ResolutionTypes]
-GO
-ALTER TABLE [dbo].[Complaints]  WITH CHECK ADD  CONSTRAINT [FK_Complaints_Status] FOREIGN KEY([StatusID])
-REFERENCES [dbo].[Status] ([StatusID])
-GO
-ALTER TABLE [dbo].[Complaints] CHECK CONSTRAINT [FK_Complaints_Status]
-GO
-ALTER TABLE [dbo].[Customers]  WITH CHECK ADD  CONSTRAINT [FK_Customers_Addresses] FOREIGN KEY([AddressID])
-REFERENCES [dbo].[Addresses] ([AddressID])
-GO
-ALTER TABLE [dbo].[Customers] CHECK CONSTRAINT [FK_Customers_Addresses]
-GO
-ALTER TABLE [dbo].[Employees]  WITH CHECK ADD  CONSTRAINT [FK_Employees_Addresses] FOREIGN KEY([AddressID])
-REFERENCES [dbo].[Addresses] ([AddressID])
-GO
-ALTER TABLE [dbo].[Employees] CHECK CONSTRAINT [FK_Employees_Addresses]
-GO
-ALTER TABLE [dbo].[Products]  WITH CHECK ADD  CONSTRAINT [FK_Products_Suppliers] FOREIGN KEY([SupplierID])
-REFERENCES [dbo].[Suppliers] ([SupplierID])
-GO
-ALTER TABLE [dbo].[Products] CHECK CONSTRAINT [FK_Products_Suppliers]
-GO
-ALTER TABLE [dbo].[ResolutionTypeOptions]  WITH CHECK ADD  CONSTRAINT [FK_ResolutionTypeOptions_PaymentMethods] FOREIGN KEY([PaymentMethodID])
-REFERENCES [dbo].[PaymentMethods] ([PaymentMethodID])
-GO
-ALTER TABLE [dbo].[ResolutionTypeOptions] CHECK CONSTRAINT [FK_ResolutionTypeOptions_PaymentMethods]
-GO
-ALTER TABLE [dbo].[ResolutionTypeOptions]  WITH CHECK ADD  CONSTRAINT [FK_ResolutionTypeOptions_ResolutionTypes] FOREIGN KEY([ResolutionTypeID])
-REFERENCES [dbo].[ResolutionTypes] ([ResolutionTypeID])
-GO
-ALTER TABLE [dbo].[ResolutionTypeOptions] CHECK CONSTRAINT [FK_ResolutionTypeOptions_ResolutionTypes]
-GO
-ALTER TABLE [dbo].[ResolutionTypeOptions]  WITH CHECK ADD  CONSTRAINT [FK_ResolutionTypeOptions_ShippingOptions] FOREIGN KEY([ShippingMethodID])
-REFERENCES [dbo].[ShippingOptions] ([ShippingMethodID])
-GO
-ALTER TABLE [dbo].[ResolutionTypeOptions] CHECK CONSTRAINT [FK_ResolutionTypeOptions_ShippingOptions]
-GO
-ALTER TABLE [dbo].[Suppliers]  WITH CHECK ADD  CONSTRAINT [FK_Suppliers_Addresses] FOREIGN KEY([AddressID])
-REFERENCES [dbo].[Addresses] ([AddressID])
-GO
-ALTER TABLE [dbo].[Suppliers] CHECK CONSTRAINT [FK_Suppliers_Addresses]
-GO
-/****** Object:  StoredProcedure [dbo].[usp_DeleteComplaint]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
+USE [ComplaintsDB];
 GO
 
-CREATE PROCEDURE [dbo].[usp_DeleteComplaint]
-    @ComplaintID INT
+ALTER DATABASE [ComplaintsDB] SET RECOVERY FULL;
+GO
+
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+GO
+
+-- ========================================
+-- 1. Tabele
+-- ========================================
+CREATE TABLE [dbo].[PostalCodes](
+    [PostalCodeID] INT NOT NULL,
+    [PostalCode] NVARCHAR(10) NOT NULL,
+    [City] NVARCHAR(50) NOT NULL,
+    CONSTRAINT [PK_PostalCodes] PRIMARY KEY CLUSTERED ([PostalCodeID] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[Addresses](
+    [AddressID] INT NOT NULL,
+    [Street] NVARCHAR(50) NOT NULL,
+    [HouseNumber] NVARCHAR(10) NOT NULL,
+    [PostalCodeID] INT NOT NULL,
+    CONSTRAINT [PK_Addresses] PRIMARY KEY CLUSTERED ([AddressID] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[Suppliers](
+    [SupplierID] INT NOT NULL,
+    [SupplierName] NVARCHAR(50) NULL,
+    [AddressID] INT NOT NULL,
+    [PhoneNumber] NVARCHAR(10) NULL,
+    CONSTRAINT [PK_Suppliers] PRIMARY KEY CLUSTERED ([SupplierID] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[ResolutionTypes](
+    [ResolutionTypeID] INT NOT NULL,
+    [ResolutionType] NVARCHAR(100) NOT NULL,
+    CONSTRAINT [PK_ResolutionTypes] PRIMARY KEY CLUSTERED ([ResolutionTypeID] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[ShippingOptions](
+    [ShippingMethodID] INT NOT NULL,
+    [ShippingMethodName] NVARCHAR(50) NULL,
+    [ShippingMethodDescription] NVARCHAR(255) NULL,
+    CONSTRAINT [PK_ShippingOptions] PRIMARY KEY CLUSTERED ([ShippingMethodID] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[PaymentMethods](
+    [PaymentMethodID] INT NOT NULL,
+    [PaymentMethodName] NVARCHAR(50) NULL,
+    [PaymentMethodDescription] NVARCHAR(255) NULL,
+    CONSTRAINT [PK_PaymentMethods] PRIMARY KEY CLUSTERED ([PaymentMethodID] ASC)
+);
+GO
+CREATE TABLE [dbo].[ResolutionTypeOptions](
+    [ResolutionTypeID] INT NOT NULL,
+    [PaymentMethodID] INT NOT NULL,
+    [ShippingMethodID] INT NOT NULL
+);
+GO
+
+CREATE TABLE [dbo].[Status](
+    [StatusID] INT NOT NULL,
+    [StatusName] NVARCHAR(50) NOT NULL,
+    CONSTRAINT [PK_Status] PRIMARY KEY CLUSTERED ([StatusID] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[Customers](
+    [CustomerID] INT NOT NULL,
+    [CustomerName] NVARCHAR(50) NOT NULL,
+    [Contact] NVARCHAR(50) NOT NULL,
+    [AddressID] INT NOT NULL,
+    CONSTRAINT [PK_Customers] PRIMARY KEY CLUSTERED ([CustomerID] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[Employees](
+    [EmployeeID] INT NOT NULL,
+    [LastName] NVARCHAR(50) NOT NULL,
+    [FirstName] NVARCHAR(50) NOT NULL,
+    [Email] NVARCHAR(100) NULL,
+    [PhoneNumber] NVARCHAR(50) NULL,
+    [HireDate] DATE NOT NULL,
+    [AddressID] INT NOT NULL,
+    [Salary] MONEY NOT NULL,
+    CONSTRAINT [PK_Employees] PRIMARY KEY CLUSTERED ([EmployeeID] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[Products](
+    [ProductID] INT NOT NULL,
+    [SupplierID] INT NULL,
+    [ProductName] NVARCHAR(50) NULL,
+    [Unit] NVARCHAR(50) NULL,
+    [Price] MONEY NULL,
+    CONSTRAINT [PK_Products] PRIMARY KEY CLUSTERED ([ProductID] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[Complaints](
+    [ComplaintID] INT NOT NULL,
+    [StatusID] INT NOT NULL,
+    [CustomerID] INT NOT NULL,
+    [EmployeeID] INT NOT NULL,
+    [ProductID] INT NOT NULL,
+    [ResolutionTypeID] INT NOT NULL,
+    [ComplaintTypeID] INT NOT NULL,
+    CONSTRAINT [PK_Complaints] PRIMARY KEY CLUSTERED ([ComplaintID] ASC)
+);
+GO
+
+CREATE TABLE [dbo].[ComplaintDetails](
+    [ComplaintID] INT NOT NULL,
+    [Description] NVARCHAR(500) NULL,
+    [ComplaintDate] DATE NOT NULL,
+    [ResolutionDate] DATE NULL,
+    CONSTRAINT [PK_ComplaintDetails] PRIMARY KEY CLUSTERED ([ComplaintID] ASC)
+);
+GO
+
+-- ========================================
+-- 2. Klucze obce 
+-- ========================================
+
+ALTER TABLE [dbo].[Addresses] WITH CHECK ADD CONSTRAINT [FK_Addresses_PostalCodes] FOREIGN KEY([PostalCodeID])
+REFERENCES [dbo].[PostalCodes]([PostalCodeID]);
+ALTER TABLE [dbo].[Addresses] CHECK CONSTRAINT [FK_Addresses_PostalCodes];
+
+ALTER TABLE [dbo].[ComplaintDetails] WITH CHECK ADD CONSTRAINT [FK_ComplaintDetails_Complaints1] FOREIGN KEY([ComplaintID])
+REFERENCES [dbo].[Complaints]([ComplaintID]);
+ALTER TABLE [dbo].[ComplaintDetails] CHECK CONSTRAINT [FK_ComplaintDetails_Complaints1];
+
+ALTER TABLE [dbo].[Complaints] WITH CHECK ADD CONSTRAINT [FK_Complaints_Customers] FOREIGN KEY([CustomerID])
+REFERENCES [dbo].[Customers]([CustomerID]);
+ALTER TABLE [dbo].[Complaints] CHECK CONSTRAINT [FK_Complaints_Customers];
+
+ALTER TABLE [dbo].[Complaints] WITH CHECK ADD CONSTRAINT [FK_Complaints_Employees] FOREIGN KEY([EmployeeID])
+REFERENCES [dbo].[Employees]([EmployeeID]);
+ALTER TABLE [dbo].[Complaints] CHECK CONSTRAINT [FK_Complaints_Employees];
+
+ALTER TABLE [dbo].[Complaints] WITH CHECK ADD CONSTRAINT [FK_Complaints_Products] FOREIGN KEY([ProductID])
+REFERENCES [dbo].[Products]([ProductID]);
+ALTER TABLE [dbo].[Complaints] CHECK CONSTRAINT [FK_Complaints_Products];
+
+ALTER TABLE [dbo].[Complaints] WITH CHECK ADD CONSTRAINT [FK_Complaints_ResolutionTypes] FOREIGN KEY([ResolutionTypeID])
+REFERENCES [dbo].[ResolutionTypes]([ResolutionTypeID]);
+ALTER TABLE [dbo].[Complaints] CHECK CONSTRAINT [FK_Complaints_ResolutionTypes];
+
+ALTER TABLE [dbo].[Complaints] WITH CHECK ADD CONSTRAINT [FK_Complaints_Status] FOREIGN KEY([StatusID])
+REFERENCES [dbo].[Status]([StatusID]);
+ALTER TABLE [dbo].[Complaints] CHECK CONSTRAINT [FK_Complaints_Status];
+
+ALTER TABLE [dbo].[Customers] WITH CHECK ADD CONSTRAINT [FK_Customers_Addresses] FOREIGN KEY([AddressID])
+REFERENCES [dbo].[Addresses]([AddressID]);
+ALTER TABLE [dbo].[Customers] CHECK CONSTRAINT [FK_Customers_Addresses];
+
+ALTER TABLE [dbo].[Employees] WITH CHECK ADD CONSTRAINT [FK_Employees_Addresses] FOREIGN KEY([AddressID])
+REFERENCES [dbo].[Addresses]([AddressID]);
+ALTER TABLE [dbo].[Employees] CHECK CONSTRAINT [FK_Employees_Addresses];
+
+ALTER TABLE [dbo].[Products] WITH CHECK ADD CONSTRAINT [FK_Products_Suppliers] FOREIGN KEY([SupplierID])
+REFERENCES [dbo].[Suppliers]([SupplierID]);
+ALTER TABLE [dbo].[Products] CHECK CONSTRAINT [FK_Products_Suppliers];
+
+ALTER TABLE [dbo].[ResolutionTypeOptions] WITH CHECK ADD CONSTRAINT [FK_ResolutionTypeOptions_PaymentMethods] FOREIGN KEY([PaymentMethodID])
+REFERENCES [dbo].[PaymentMethods]([PaymentMethodID]);
+ALTER TABLE [dbo].[ResolutionTypeOptions] CHECK CONSTRAINT [FK_ResolutionTypeOptions_PaymentMethods];
+
+ALTER TABLE [dbo].[ResolutionTypeOptions] WITH CHECK ADD CONSTRAINT [FK_ResolutionTypeOptions_ResolutionTypes] FOREIGN KEY([ResolutionTypeID])
+REFERENCES [dbo].[ResolutionTypes]([ResolutionTypeID]);
+ALTER TABLE [dbo].[ResolutionTypeOptions] CHECK CONSTRAINT [FK_ResolutionTypeOptions_ResolutionTypes];
+
+ALTER TABLE [dbo].[ResolutionTypeOptions] WITH CHECK ADD CONSTRAINT [FK_ResolutionTypeOptions_ShippingOptions] FOREIGN KEY([ShippingMethodID])
+REFERENCES [dbo].[ShippingOptions]([ShippingMethodID]);
+ALTER TABLE [dbo].[ResolutionTypeOptions] CHECK CONSTRAINT [FK_ResolutionTypeOptions_ShippingOptions];
+
+ALTER TABLE [dbo].[Suppliers] WITH CHECK ADD CONSTRAINT [FK_Suppliers_Addresses] FOREIGN KEY([AddressID])
+REFERENCES [dbo].[Addresses]([AddressID]);
+ALTER TABLE [dbo].[Suppliers] CHECK CONSTRAINT [FK_Suppliers_Addresses];
+
+-- ========================================
+-- 3. Sekwencje do ID's 
+-- ========================================
+
+CREATE SEQUENCE SEQ_Customers AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_Employees AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_Products AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_Status AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_Complaints AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_ComplaintDetails AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_PaymentMethods AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_ResolutionTypes AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_Suppliers AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_Addresses AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_PostalCodes AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_ShippingOptions AS INT START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE SEQ_ResolutionTypeOptions AS INT START WITH 1 INCREMENT BY 1;
+GO
+
+-- ========================================
+-- 4. Triggery
+-- ========================================
+
+CREATE TRIGGER trg_IDUpdate_Customers
+ON Customers
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO Customers(CustomerID, CustomerName, Contact, AddressID)
+    SELECT NEXT VALUE FOR SEQ_Customers, CustomerName, Contact, AddressID
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_Employees
+ON Employees
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO Employees(EmployeeID, LastName, FirstName, Email, PhoneNumber, HireDate, AddressID, Salary)
+    SELECT NEXT VALUE FOR SEQ_Employees, LastName, FirstName, Email, PhoneNumber, HireDate, AddressID, Salary
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_Products
+ON Products
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO Products(ProductID, SupplierID, ProductName, Unit, Price)
+    SELECT NEXT VALUE FOR SEQ_Products, SupplierID, ProductName, Unit, Price
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_Status
+ON Status
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO Status(StatusID, StatusName)
+    SELECT NEXT VALUE FOR SEQ_Status, StatusName
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_Complaints
+ON Complaints
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO Complaints(ComplaintID, StatusID, CustomerID, EmployeeID, ProductID, ResolutionTypeID, ComplaintTypeID)
+    SELECT NEXT VALUE FOR SEQ_Complaints, StatusID, CustomerID, EmployeeID, ProductID, ResolutionTypeID, ComplaintTypeID
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_UpdateResolutionDate
+ON Complaints
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE cd
+    SET ResolutionDate = GETDATE()
+    FROM ComplaintDetails cd
+    INNER JOIN inserted i ON cd.ComplaintID = i.ComplaintID
+    WHERE i.StatusID = 4;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_ComplaintDetails
+ON ComplaintDetails
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO ComplaintDetails(ComplaintID, Description, ComplaintDate, ResolutionDate)
+    SELECT NEXT VALUE FOR SEQ_ComplaintDetails, Description, ComplaintDate, ResolutionDate
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_PaymentMethods
+ON PaymentMethods
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO PaymentMethods(PaymentMethodID, PaymentMethodName, PaymentMethodDescription)
+    SELECT NEXT VALUE FOR SEQ_PaymentMethods, PaymentMethodName, PaymentMethodDescription
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_ResolutionTypes
+ON ResolutionTypes
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO ResolutionTypes(ResolutionTypeID, ResolutionType)
+    SELECT NEXT VALUE FOR SEQ_ResolutionTypes, ResolutionType
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_Suppliers
+ON Suppliers
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO Suppliers(SupplierID, SupplierName, AddressID, PhoneNumber)
+    SELECT NEXT VALUE FOR SEQ_Suppliers, SupplierName, AddressID, PhoneNumber
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_Addresses
+ON Addresses
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO Addresses(AddressID, Street, HouseNumber, PostalCodeID)
+    SELECT NEXT VALUE FOR SEQ_Addresses, Street, HouseNumber, PostalCodeID
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_PostalCodes
+ON PostalCodes
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO PostalCodes(PostalCodeID, PostalCode, City)
+    SELECT NEXT VALUE FOR SEQ_PostalCodes, PostalCode, City
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_ShippingOptions
+ON ShippingOptions
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO ShippingOptions(ShippingMethodID, ShippingMethodName, ShippingMethodDescription)
+    SELECT NEXT VALUE FOR SEQ_ShippingOptions, ShippingMethodName, ShippingMethodDescription
+    FROM inserted;
+END;
+GO
+
+CREATE TRIGGER trg_IDUpdate_ResolutionTypeOptions
+ON ResolutionTypeOptions
+INSTEAD OF INSERT
+AS
+BEGIN
+    INSERT INTO ResolutionTypeOptions(ResolutionTypeID, PaymentMethodID, ShippingMethodID)
+    SELECT NEXT VALUE FOR SEQ_ResolutionTypeOptions, PaymentMethodID, ShippingMethodID
+    FROM inserted;
+END;
+GO
+
+-- ========================================
+-- 5. Procedury 
+-- ========================================
+
+CREATE PROCEDURE usp_InsertCustomer
+    @CustomerName VARCHAR(50),
+    @Contact VARCHAR(20),
+    @AddressID INT
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        BEGIN TRANSACTION;
-        DELETE FROM ComplaintDetails WHERE ComplaintID = @ComplaintID;
-        DELETE FROM Complaints WHERE ComplaintID = @ComplaintID;
-        COMMIT TRANSACTION;
+        INSERT INTO Customers (CustomerName, Contact, AddressID)
+        VALUES (@CustomerName, @Contact, @AddressID);
     END TRY
     BEGIN CATCH
-        ROLLBACK TRANSACTION;
-        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
         RAISERROR (@ErrorMessage, 16, 1);
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertComplaint]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
+
+CREATE PROCEDURE usp_InsertEmployee
+    @LastName VARCHAR(50),
+    @FirstName VARCHAR(50),
+    @Email VARCHAR(100),
+    @PhoneNumber VARCHAR(15),
+    @HireDate DATE,
+    @AddressID INT,
+    @Salary MONEY
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO Employees (LastName, FirstName, Email, PhoneNumber, HireDate, AddressID, Salary)
+        VALUES (@LastName, @FirstName, @Email, @PhoneNumber, @HireDate, @AddressID, @Salary);
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage, 16, 1);
+    END CATCH
+END;
 GO
 
-CREATE PROCEDURE [dbo].[usp_InsertComplaint]
+CREATE PROCEDURE usp_InsertProduct
+    @SupplierID INT,
+    @ProductName VARCHAR(50),
+    @Unit VARCHAR(20),
+    @Price MONEY
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO Products (SupplierID, ProductName, Unit, Price)
+        VALUES (@SupplierID, @ProductName, @Unit, @Price);
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage, 16, 1);
+    END CATCH
+END;
+GO
+
+CREATE PROCEDURE usp_InsertStatus
+    @StatusName VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO Status (StatusName)
+        VALUES (@StatusName);
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage, 16, 1);
+    END CATCH
+END;
+GO
+
+CREATE PROCEDURE usp_InsertComplaint
     @StatusID INT,
     @CustomerID INT,
     @EmployeeID INT,
     @ProductID INT,
-	@ResolutionTypeID INT,
-	@ComplaintTypeID INT
+    @ResolutionTypeID INT,
+    @ComplaintTypeID INT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -390,13 +466,8 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertComplaintDetail]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 
-CREATE PROCEDURE [dbo].[usp_InsertComplaintDetail]
+CREATE PROCEDURE usp_InsertComplaintDetail
     @ComplaintID INT,
     @Description VARCHAR(500),
     @ComplaintDate DATE,
@@ -414,75 +485,162 @@ BEGIN
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertEmployee]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 
-CREATE PROCEDURE [dbo].[usp_InsertEmployee]
-    @LastName VARCHAR(50),
-    @FirstName VARCHAR(50),
-    @Email VARCHAR(100),
-    @PhoneNumber VARCHAR(15),
-    @HireDate DATE,
-	@AddressID INT,
-    @Salary MONEY
+CREATE PROCEDURE usp_DeleteComplaint
+    @ComplaintID INT
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        INSERT INTO Employees (LastName, FirstName, Email, PhoneNumber, HireDate, AddressID, Salary)
-        VALUES (@LastName, @FirstName, @Email, @PhoneNumber, @HireDate, @AddressID, @Salary);
+        BEGIN TRANSACTION;
+        DELETE FROM ComplaintDetails WHERE ComplaintID = @ComplaintID;
+        DELETE FROM Complaints WHERE ComplaintID = @ComplaintID;
+        COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
-        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
+        ROLLBACK TRANSACTION;
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
         RAISERROR (@ErrorMessage, 16, 1);
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertProduct]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 
-CREATE PROCEDURE [dbo].[usp_InsertProduct]
-	@SupplierID INT,
-    @ProductName VARCHAR(50),
-    @Unit VARCHAR(20),
-    @Price MONEY
+
+CREATE PROCEDURE usp_InsertPaymentMethod
+    @PaymentMethodName VARCHAR(50),
+    @PaymentMethodDescription VARCHAR(255) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        INSERT INTO Products (SupplierID, ProductName, Unit, Price)
-        VALUES (@SupplierID, @ProductName, @Unit, @Price);
+        INSERT INTO PaymentMethods (PaymentMethodName, PaymentMethodDescription)
+        VALUES (@PaymentMethodName, @PaymentMethodDescription);
     END TRY
     BEGIN CATCH
         DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
-        RAISERROR (@ErrorMessage, 16, 1);
+        RAISERROR (@ErrorMessage,16,1);
     END CATCH
 END;
 GO
-/****** Object:  StoredProcedure [dbo].[usp_InsertStatus]    Script Date: 09.12.2024 15:55:13 ******/
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 
-CREATE PROCEDURE [dbo].[usp_InsertStatus]
-    @StatusName VARCHAR(50)
+CREATE PROCEDURE usp_InsertAddress
+    @Street NVARCHAR(50),
+    @HouseNumber NVARCHAR(10),
+    @PostalCodeID INT
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        INSERT INTO Status (StatusName)
-        VALUES (@StatusName);
+        INSERT INTO Addresses (Street, HouseNumber, PostalCodeID)
+        VALUES (@Street, @HouseNumber, @PostalCodeID);
     END TRY
     BEGIN CATCH
         DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
-        RAISERROR (@ErrorMessage, 16, 1);
+        RAISERROR (@ErrorMessage,16,1);
+    END CATCH
+END;
+GO
+
+CREATE PROCEDURE usp_InsertPostalCode
+    @PostalCode NVARCHAR(10),
+    @City NVARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO PostalCodes (PostalCode, City)
+        VALUES (@PostalCode, @City);
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage,16,1);
+    END CATCH
+END;
+GO
+
+CREATE PROCEDURE usp_InsertSupplier
+    @SupplierName NVARCHAR(50),
+    @AddressID INT,
+    @PhoneNumber NVARCHAR(10) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO Suppliers (SupplierName, AddressID, PhoneNumber)
+        VALUES (@SupplierName, @AddressID, @PhoneNumber);
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage,16,1);
+    END CATCH
+END;
+GO
+
+CREATE PROCEDURE usp_InsertResolutionType
+    @ResolutionType NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO ResolutionTypes (ResolutionType)
+        VALUES (@ResolutionType);
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage,16,1);
+    END CATCH
+END;
+GO
+
+CREATE PROCEDURE usp_InsertShippingOption
+    @ShippingMethodName NVARCHAR(50),
+    @ShippingMethodDescription NVARCHAR(255) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO ShippingOptions (ShippingMethodName, ShippingMethodDescription)
+        VALUES (@ShippingMethodName, @ShippingMethodDescription);
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage,16,1);
+    END CATCH
+END;
+GO
+
+CREATE PROCEDURE usp_InsertResolutionTypeOption
+    @ResolutionTypeID INT,
+    @PaymentMethodID INT,
+    @ShippingMethodID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        INSERT INTO ResolutionTypeOptions (ResolutionTypeID, PaymentMethodID, ShippingMethodID)
+        VALUES (@ResolutionTypeID, @PaymentMethodID, @ShippingMethodID);
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage,16,1);
+    END CATCH
+END;
+GO
+
+CREATE PROCEDURE usp_UpdateComplaintStatus
+    @ComplaintID INT,
+    @NewStatusID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+        UPDATE Complaints
+        SET StatusID = @NewStatusID
+        WHERE ComplaintID = @ComplaintID;
+    END TRY
+    BEGIN CATCH
+        DECLARE @ErrorMessage VARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage,16,1);
     END CATCH
 END;
 GO
