@@ -87,7 +87,7 @@ Szczegóły reklamacji, takie jak opis, data zgłoszenia i rozwiązania.
 
 Poniżej znajduje się zrzut ekranu przedstawiający różne wizualizacje danych przygotowane w Power BI na podstawie bazy **ComplaintsDB**.
 
-![Wykresy wizualizacji danych](images/wykresy.png)
+![Wykresy wizualizacji danych](images/Wykresy.png)
 
 ### Opis Wykresów
 1. **Liczba reklamacji według pracownika**  
