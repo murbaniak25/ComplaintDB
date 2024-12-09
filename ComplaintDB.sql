@@ -889,4 +889,205 @@ GO
 --STATS = 10; -- Wyœwietlanie postêpu co 10%
 --GO
 
+-- ========================================
+-- 10. Przyklady uzycia
+-- ========================================
 
+CREATE VIEW [dbo].[vw_ReklamacjePracownicy] AS
+SELECT
+    e.EmployeeID,
+    e.FirstName + ' ' + e.LastName AS EmployeeName,
+    COUNT(c.ComplaintID) AS LiczbaReklamacji
+FROM
+    Complaints c
+    INNER JOIN Employees e ON c.EmployeeID = e.EmployeeID
+GROUP BY
+    e.EmployeeID,
+    e.FirstName,
+    e.LastName;
+GO
+
+CREATE VIEW [dbo].[vw_ComplaintsByStatus] AS
+SELECT 
+    s.StatusName, 
+    COUNT(c.ComplaintID) AS ComplaintCount
+FROM 
+    Status s
+LEFT JOIN 
+    Complaints c ON s.StatusID = c.StatusID
+GROUP BY 
+    s.StatusName;
+GO
+
+CREATE VIEW [dbo].[vw_ComplaintResolutionTime] AS
+SELECT 
+    cd.ComplaintID,
+    cu.CustomerName,
+    p.ProductName,
+    DATEDIFF(DAY, cd.ComplaintDate, cd.ResolutionDate) AS ResolutionTimeDays
+FROM 
+    ComplaintDetails cd
+JOIN 
+    Complaints c ON cd.ComplaintID = c.ComplaintID
+JOIN 
+    Customers cu ON c.CustomerID = cu.CustomerID
+JOIN 
+    Products p ON c.ProductID = p.ProductID;
+GO
+
+CREATE VIEW vw_AvgResolutionTimeByEmployee AS
+SELECT 
+    e.EmployeeID,
+    e.FirstName + ' ' + e.LastName AS EmployeeName,
+    AVG(DATEDIFF(DAY, cd.ComplaintDate, cd.ResolutionDate)) AS AvgResolutionTimeDays
+FROM Complaints c
+JOIN ComplaintDetails cd ON c.ComplaintID = cd.ComplaintID
+JOIN Employees e ON c.EmployeeID = e.EmployeeID
+WHERE cd.ResolutionDate IS NOT NULL
+GROUP BY e.EmployeeID, e.FirstName, e.LastName;
+GO
+
+GO
+CREATE VIEW vw_AvgResolutionTimeByProduct AS
+SELECT 
+    p.ProductID,
+    p.ProductName,
+    AVG(DATEDIFF(DAY, cd.ComplaintDate, cd.ResolutionDate)) AS AvgResolutionTimeDays
+FROM Complaints c
+JOIN ComplaintDetails cd ON c.ComplaintID = cd.ComplaintID
+JOIN Products p ON c.ProductID = p.ProductID
+WHERE cd.ResolutionDate IS NOT NULL
+GROUP BY p.ProductID, p.ProductName;
+GO
+
+SELECT ProductName, AvgResolutionTimeDays
+FROM vw_AvgResolutionTimeByProduct
+WHERE AvgResolutionTimeDays IS NOT NULL
+ORDER BY AvgResolutionTimeDays DESC;
+GO
+CREATE VIEW vw_ComplaintsPerCustomerStatus AS
+SELECT 
+    cu.CustomerID,
+    cu.CustomerName,
+    s.StatusName,
+    COUNT(c.ComplaintID) AS ComplaintCount
+FROM Complaints c
+JOIN Customers cu ON c.CustomerID = cu.CustomerID
+JOIN Status s ON c.StatusID = s.StatusID
+GROUP BY cu.CustomerID, cu.CustomerName, s.StatusName;
+GO
+
+SELECT *
+FROM vw_ComplaintsPerCustomerStatus
+WHERE CustomerName = 'Jan Kowalski';
+
+GO
+CREATE VIEW vw_ComplaintsBySupplier AS
+SELECT 
+    s.SupplierName,
+    COUNT(c.ComplaintID) AS ComplaintCount
+FROM Complaints c
+JOIN Products p ON c.ProductID = p.ProductID
+JOIN Suppliers s ON p.SupplierID = s.SupplierID
+GROUP BY s.SupplierName;
+GO
+
+-- Lista wszystkich reklamacji
+SELECT
+    c.ComplaintID,
+    cu.CustomerName,
+    p.ProductName,
+    s.StatusName,
+    cd.ComplaintDate
+FROM
+    Complaints c
+    INNER JOIN Customers cu ON c.CustomerID = cu.CustomerID
+    INNER JOIN Products p ON c.ProductID = p.ProductID
+    INNER JOIN Status s ON c.StatusID = s.StatusID
+    INNER JOIN ComplaintDetails cd on c.ComplaintID = cd.ComplaintID;
+
+-- Lista reklamacji w stosunku do aktualnego Statusu 
+
+SELECT
+    s.StatusName,
+    COUNT(*) AS LiczbaReklamacji
+FROM
+    Complaints c
+    INNER JOIN Status s ON c.StatusID = s.StatusID
+GROUP BY
+    s.StatusName;
+
+-- Lista z liczb¹ reklamacji dla konkretnego klienta
+
+SELECT
+    c.ComplaintID,
+    cd.Description,
+    cd.ResolutionDate
+FROM
+    Complaints c
+    INNER JOIN ComplaintDetails cd ON c.ComplaintID = cd.ComplaintID
+WHERE
+    c.CustomerID = 1;
+	
+
+-- Sredni czas realizacji zamowienia
+WITH ComplaintDurations AS (
+    SELECT
+        c.ComplaintID,
+        cd.ComplaintDate AS StartDate,
+        cd.ResolutionDate AS EndDate
+    FROM
+        Complaints c
+        INNER JOIN ComplaintDetails cd ON c.ComplaintID = cd.ComplaintID
+    WHERE
+        cd.ResolutionDate IS NOT NULL
+)
+SELECT
+    AVG(DATEDIFF(day, StartDate, EndDate)) AS SredniCzasObslugi
+FROM
+    ComplaintDurations;
+
+
+SELECT * 
+FROM vw_ReklamacjePracownicy;
+
+SELECT * 
+FROM vw_ComplaintsByStatus;
+
+SELECT * 
+FROM vw_ComplaintResolutionTime
+WHERE ResolutionTimeDays IS NOT NULL
+ORDER BY ResolutionTimeDays DESC;
+
+SELECT AVG(ResolutionTimeDays) AS ŒredniCzasRozwi¹zania
+FROM vw_ComplaintResolutionTime
+WHERE ResolutionTimeDays IS NOT NULL;
+
+SELECT EmployeeName, LiczbaReklamacji
+FROM vw_ReklamacjePracownicy
+WHERE EmployeeName LIKE '%Anna Nowak%';
+
+
+
+SELECT * 
+FROM vw_AvgResolutionTimeByEmployee
+ORDER BY AvgResolutionTimeDays ASC;
+
+
+
+SELECT *
+FROM vw_ComplaintsBySupplier
+ORDER BY ComplaintCount DESC;
+
+select * from Complaints;
+
+select ResolutionDate from ComplaintDetails 
+where ComplaintID = 4;
+
+select * from ComplaintDetails;
+
+update Complaints 
+set StatusID = 4 
+where ComplaintID = 3;
+
+select ResolutionDate from ComplaintDetails where ComplaintID=3
