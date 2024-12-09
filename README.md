@@ -5,6 +5,7 @@
 2. [Tabele](#tabele)
 3. [Procedury Składowane](#procedury-składowane)
 4. [Triggery](#triggery)
+5. [Analiza Wizualna](#analiza-wizualna)
 
 ---
 
@@ -53,9 +54,9 @@ Szczegóły reklamacji, takie jak opis, data zgłoszenia i rozwiązania.
 
 ### Lista Procedur
 1. **`usp_Insert`**  
-   Dodaje nowy record do danej tabeli
+   Dodaje nowy record do danej tabeli.
    **Parametry**:
-   W zależności od tabeli
+  - W zależności od tabeli.
    
 3. **`usp_UpdateComplaintStatus`**  
    Aktualizuje status reklamacji.  
@@ -82,3 +83,7 @@ Szczegóły reklamacji, takie jak opis, data zgłoszenia i rozwiązania.
    Ustawia datę rozwiązania reklamacji, gdy jej status zmienia się na "Zakończona".
 
 ---
+
+## Analiza Wizualna
+Poniżej przedstawiono wizualizacje danych przygotowane w Power BI na podstawie bazy **ComplaintsDB**.
+
