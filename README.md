@@ -58,13 +58,13 @@ Szczegóły reklamacji, takie jak opis, data zgłoszenia i rozwiązania.
    **Parametry**:
   - W zależności od tabeli.
    
-3. **`usp_UpdateComplaintStatus`**  
+2. **`usp_UpdateComplaintStatus`**  
    Aktualizuje status reklamacji.  
    **Parametry**:
    - `@ComplaintID`: ID reklamacji.
    - `@NewStatusID`: Nowy status.
 
-4. **`usp_DeleteComplaint`**  
+3. **`usp_DeleteComplaint`**  
    Usuwa reklamację i powiązane szczegóły.  
 
 ---
